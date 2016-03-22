@@ -20,6 +20,7 @@ var CheckboxesGame = (function() {
 
     this._state = "y".repeat(this._height).split('').map(() => new Array(this._width));
 
+    this.resetNumberOfStrokes();
     this.render();
     this.bindListeners();
   }
@@ -46,6 +47,8 @@ var CheckboxesGame = (function() {
       <div id="${this._id}">
          ${body}
          <br />
+         Сделано ${this.numberOfStrokes} ходов
+          <br />
          <button data-role="clear">Очистить</button>
          <br />
          ${levels}
@@ -70,6 +73,11 @@ var CheckboxesGame = (function() {
     });
   };
 
+  CheckboxesGame.prototype.resetNumberOfStrokes = function() {
+    this.numberOfStrokes = 0;
+    return this;
+  };
+
   CheckboxesGame.prototype.did = function(x, y) {
     this._state[x][y] = !this._state[x][y];
 
@@ -81,6 +89,13 @@ var CheckboxesGame = (function() {
     }
     this._state[x][y - 1] = !this._state[x][y - 1];
     this._state[x][y + 1] = !this._state[x][y + 1];
+
+    this.numberOfStrokes++;
+
+    if(this.isEmpty()) {
+      alert(`Wow! Вы выиграли за ${this.numberOfStrokes} ходов`);
+    }
+
     return this;
   };
 
@@ -90,6 +105,7 @@ var CheckboxesGame = (function() {
     }
     this.clearAll();
     LEVELS[num].forEach((cell) => this._state[cell.y][cell.x] = true);
+    this.resetNumberOfStrokes();
     return this;
   };
 
@@ -97,8 +113,15 @@ var CheckboxesGame = (function() {
     this._element.innerHTML = this.getTemplate();
   };
 
+  CheckboxesGame.prototype.isEmpty = function() {
+    var hasNonEmptyCell = false;
+    this._state.forEach((item) => item.forEach((cell) => hasNonEmptyCell = hasNonEmptyCell || cell));
+    return !hasNonEmptyCell;
+  };
+
   CheckboxesGame.prototype.clearAll = function() {
     this._state.forEach((row, rowNum) => row.forEach((_, colNum) => this._state[rowNum][colNum] = false));
+    this.resetNumberOfStrokes();
     return this;
   };
 
