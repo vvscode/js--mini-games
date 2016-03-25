@@ -13,15 +13,10 @@ var boxColor = 'blue';
 var boxHeight = 10;
 var boxWidth = 10;
 
-function clearCanvas() {
-  context.fillStyle = canvasBackgroundColor;
-  context.fillRect(0, 0, canvasWidth, canvasHeight);
-}
-
-function drawRect(x, y, width, height, color) {
-  context.fillStyle = color;
-  context.fillRect(x, y, width, height);
-}
+var boxes = [];
+var car;
+var level;
+var steps = 1;
 
 function Car(x, y) { this.x = x; this.y = y; }
 Car.prototype.draw = function(x, y) {
@@ -40,17 +35,35 @@ Box.prototype.draw = function(x, y) {
 Box.prototype.moveDown = function() {
   this.y = this.y + this.stepSize;
   return this;
+};
+
+function clearCanvas() {
+  context.fillStyle = canvasBackgroundColor;
+  context.fillRect(0, 0, canvasWidth, canvasHeight);
 }
 
+function drawRect(x, y, width, height, color) {
+  context.fillStyle = color;
+  context.fillRect(x, y, width, height);
+}
 
-var car = new Car(canvasWidth / 2, canvasHeight - carHeight - carBottomGap);
-car.draw();
+car = new Car(canvasWidth / 2, canvasHeight - carHeight - carBottomGap);
 
-var boxes = "x".repeat(40).split('').map(() => new Box(Math.random()*canvasWidth - boxWidth, Math.random()*canvasHeight - boxHeight));
-boxes.forEach((box) => box.draw());
+function addBox() {
+  boxes.push(new Box(Math.random()*canvasWidth - boxWidth, -boxHeight));
+}
 
-document.querySelector('#moveDown').addEventListener('click', () => {
+function nextStep() {
   clearCanvas();
   car.draw();
   boxes.forEach((item) => item.moveDown().draw());
-});
+}
+
+var interval = setInterval(() => {
+  steps++;
+  if((Math.random() * 1000) < steps) {
+    addBox();
+  }
+  nextStep();
+  boxes = boxes.filter((item) => item.y < canvasHeight);
+}, 50);
