@@ -31,6 +31,13 @@ Car.prototype.move = function(x, y) {
   this.y = y;
 };
 
+Car.prototype.isInside = function(box) {
+  const boxLeft = box.x;
+  const boxTop = box.y;
+  return (boxLeft > (this.x - boxWidth) && boxLeft < (this.x + carWidth))
+      && (boxTop  > (this.y - boxHeight) && boxTop < (this.y + carHeight));
+};
+
 function Box(x, y) { this.x = x; this.y = y; this.stepSize = boxHeight / 2; }
 Box.prototype.draw = function(x, y) {
   x = x === undefined ? this.x : x;
@@ -69,6 +76,10 @@ function stopInterval() {
   clearInterval(interval);
 }
 
+function isCrash(car, boxes) {
+  return boxes.some((box) => car.isInside(box));
+}
+
 function startInterval() {
   stopInterval();
   interval = setInterval(() => {
@@ -78,13 +89,21 @@ function startInterval() {
     }
     nextStep();
     boxes = boxes.filter((item) => item.y < canvasHeight);
+    if(isCrash(car, boxes)) {
+      stopInterval();
+      alert(`You are crashed. You pass ${steps} iterations`);
+    }
   }, 50);
 }
 
 document.querySelector('#stop').addEventListener('click', stopInterval);
-document.querySelector('#start').addEventListener('click', startInterval);
+document.querySelector('#start').addEventListener('click', () => {
+  boxes = [];
+  steps = 0;
+  startInterval();
+});
 document.querySelector('canvas').addEventListener('mousemove', (ev) => {
   const newX = ev.offsetX - carWidth / 2;
   const moveToX = newX < 0 ? 0 : (newX > (canvasWidth - carWidth)) ? (canvasWidth - carWidth) : newX;
-  car.move(moveToX, car.y)
+  car.move(moveToX, car.y);
 });
