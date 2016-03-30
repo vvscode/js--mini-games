@@ -17,12 +17,18 @@ var boxes = [];
 var car;
 var level;
 var steps = 1;
+var interval;
 
 function Car(x, y) { this.x = x; this.y = y; }
 Car.prototype.draw = function(x, y) {
   x = x === undefined ? this.x : x;
   y = y === undefined ? this.y : y;
   return drawRect(x, y, carWidth, carHeight, carColor);
+};
+
+Car.prototype.move = function(x, y) {
+  this.x = x;
+  this.y = y;
 };
 
 function Box(x, y) { this.x = x; this.y = y; this.stepSize = boxHeight / 2; }
@@ -59,11 +65,26 @@ function nextStep() {
   boxes.forEach((item) => item.moveDown().draw());
 }
 
-var interval = setInterval(() => {
-  steps++;
-  if((Math.random() * 1000) < steps) {
-    addBox();
-  }
-  nextStep();
-  boxes = boxes.filter((item) => item.y < canvasHeight);
-}, 50);
+function stopInterval() {
+  clearInterval(interval);
+}
+
+function startInterval() {
+  stopInterval();
+  interval = setInterval(() => {
+    steps++;
+    if((Math.random() * 1000) < steps) {
+      addBox();
+    }
+    nextStep();
+    boxes = boxes.filter((item) => item.y < canvasHeight);
+  }, 50);
+}
+
+document.querySelector('#stop').addEventListener('click', stopInterval);
+document.querySelector('#start').addEventListener('click', startInterval);
+document.querySelector('canvas').addEventListener('mousemove', (ev) => {
+  const newX = ev.offsetX - carWidth / 2;
+  const moveToX = newX < 0 ? 0 : (newX > (canvasWidth - carWidth)) ? (canvasWidth - carWidth) : newX;
+  car.move(moveToX, car.y)
+});
